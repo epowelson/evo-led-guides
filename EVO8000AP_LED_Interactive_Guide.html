@@ -1269,7 +1269,10 @@ function renderStateCard(s) {
     const natW = imgEl.naturalWidth;
     const natH = imgEl.naturalHeight;
 
-    const scale = Math.min(wW / natW, wH / natH);
+    // Must match frameGeometry() exactly — use same REF dimensions so
+    // hotspot positions align with where the canvas actually draws each frame
+    const REF_W = 1660, REF_H = 2600;
+    const scale = Math.min(wW / REF_W, wH / REF_H);
     const rendW = natW * scale;
     const rendH = natH * scale;
     const offX = (wW - rendW) / 2;
