@@ -81,7 +81,7 @@
   .app {
     flex: 1;
     display: grid;
-    grid-template-columns: 1fr 400px;
+    grid-template-columns: 1fr 300px;
     gap: 0;
     min-height: 0;
     overflow: hidden;
@@ -129,12 +129,13 @@
     color: var(--text-muted);
     font-family: var(--mono);
     letter-spacing: 0.04em;
+    text-align: left;
   }
 
   .info-placeholder p.placeholder-sub {
     font-size: 12px;
     color: var(--text-dim);
-    text-align: center;
+    text-align: left;
     line-height: 1.6;
     margin-top: -4px;
   }
@@ -333,14 +334,20 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding-top: 28px;
     gap: 12px;
     color: var(--text-dim);
   }
 
   .info-placeholder svg {
     opacity: 0.3;
+    align-self: center;
+  }
+  .info-placeholder img[alt="LED indicator"],
+  .info-placeholder img[alt="Ethernet port"] {
+    align-self: center;
   }
 
   .info-placeholder p {
@@ -649,7 +656,7 @@
     <div class="info-placeholder" id="placeholder">
       <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/2wBDAQMDAwQDBAgEBAgQCwkLEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBD/wAARCAAlABIDASIAAhEBAxEB/8QAGQABAAMBAQAAAAAAAAAAAAAAAAEFCAIJ/8QALBAAAQIDAwsFAAAAAAAAAAAAAQACBQYWESFRAwgSUlRWZJKU0dIYMTNTYv/EABoBAAICAwAAAAAAAAAAAAAAAAIIAAMBBgf/xAAhEQAABAcBAQEAAAAAAAAAAAAAAQRSAgUUFRdTkgORof/aAAwDAQACEQMRAD8Ax+3Nzm1zQ5srRFws2V/ZT6c5t3WiPSv7LdVgxS7FLbkiYtIKNluaML6Ywa7N5mcEimoh77O/si3nb+QityVMG/osy7NmF0IsOCWHBVAnSTnAGq4Tfx2S8krKTt64R12S8loFCp1xcjl9tWaYuTFxou1UVCZ5ksEiq4XdxLPJFLeq1xcmCta7TFyY832zrF9H5DzFRWsX1zzFETYUfgwg79AmYQ4rWL/YeYoiLNH4NIHQJmEP/9k=" alt="LED indicator" style="width:18px;height:37px;opacity:0.75;margin-bottom:4px;" />
       <p class="placeholder-headline">Click any LED to view its states</p>
-      <p class="placeholder-sub">Hover over the device image to reveal<br>the interactive LED zones, then click one.</p>
+      <p class="placeholder-sub">Hover over the device image to reveal the interactive LED zones, then click one.</p>
     </div>
   </div>
 
@@ -1114,15 +1121,15 @@ function clearActive() {
 
 function clearInfo() {
   const isBack = (currentFrame === BACK_FRAME);
-  const headline = isBack ? 'Click a port to view details' : 'Click any LED to view its states';
+  const headline = isBack ? 'Click any component for its description' : 'Click any LED to view its states';
   const subline  = isBack
-    ? 'Hover over the back panel to reveal<br>the interactive port zones, then click one.'
-    : 'Hover over the device image to reveal<br>the interactive LED zones, then click one.';
+    ? 'Hover over the device image to reveal the interactive component zones, then click one.'
+    : 'Hover over the device image to reveal the interactive LED zones, then click one.';
   document.getElementById('infoPanel').innerHTML = `
     <div class="info-placeholder" id="placeholder">
       ${isBack ? `<img src="data:image/png;base64,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" alt="Ethernet port" style="width:48px;height:48px;margin-bottom:6px;opacity:0.85;" />` : `<img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/2wBDAQMDAwQDBAgEBAgQCwkLEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBD/wAARCAAlABIDASIAAhEBAxEB/8QAGQABAAMBAQAAAAAAAAAAAAAAAAEFCAIJ/8QALBAAAQIDAwsFAAAAAAAAAAAAAQACBQYWESFRAwgSUlRWZJKU0dIYMTNTYv/EABoBAAICAwAAAAAAAAAAAAAAAAIIAAMBBgf/xAAhEQAABAcBAQEAAAAAAAAAAAAAAQRSAgUUFRdTkgORof/aAAwDAQACEQMRAD8Ax+3Nzm1zQ5srRFws2V/ZT6c5t3WiPSv7LdVgxS7FLbkiYtIKNluaML6Ywa7N5mcEimoh77O/si3nb+QityVMG/osy7NmF0IsOCWHBVAnSTnAGq4Tfx2S8krKTt64R12S8loFCp1xcjl9tWaYuTFxou1UVCZ5ksEiq4XdxLPJFLeq1xcmCta7TFyY832zrF9H5DzFRWsX1zzFETYUfgwg79AmYQ4rWL/YeYoiLNH4NIHQJmEP/9k=" alt="LED indicator" style="width:18px;height:37px;opacity:0.75;margin-bottom:4px;" />`}
       <p class="placeholder-headline">Click any LED to view its states</p>
-      <p class="placeholder-sub">Hover over the device image to reveal<br>the interactive LED zones, then click one.</p>
+      <p class="placeholder-sub">Hover over the device image to reveal the interactive LED zones, then click one.</p>
     </div>`;
 }
 
@@ -1335,12 +1342,16 @@ function resizeCanvas() {
 
 function frameGeometry(img) {
   if (!img || !img.complete || !img.naturalWidth) return null;
-  const scale = Math.min(canvasW / img.naturalWidth, canvasH / img.naturalHeight);
+  // Use consistent reference dimensions (widest frame C: 1660x2600)
+  // so ALL frames scale identically — no jump between narrow/wide frames
+  const REF_W = 1660, REF_H = 2600;
+  const scale = Math.min(canvasW / REF_W, canvasH / REF_H);
+  const w = img.naturalWidth  * scale;
+  const h = img.naturalHeight * scale;
   return {
     scale,
-    w: img.naturalWidth  * scale,
-    h: img.naturalHeight * scale,
-    x: (canvasW - img.naturalWidth  * scale) / 2,
+    w, h,
+    x: (canvasW - w) / 2,
     y: 0
   };
 }

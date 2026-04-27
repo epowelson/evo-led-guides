@@ -81,7 +81,7 @@
   .app {
     flex: 1;
     display: grid;
-    grid-template-columns: 1fr 400px;
+    grid-template-columns: 1fr 300px;
     gap: 0;
     min-height: 0;
     overflow: hidden;
@@ -129,12 +129,13 @@
     color: var(--text-muted);
     font-family: var(--mono);
     letter-spacing: 0.04em;
+    text-align: left;
   }
 
   .info-placeholder p.placeholder-sub {
     font-size: 12px;
     color: var(--text-dim);
-    text-align: center;
+    text-align: left;
     line-height: 1.6;
     margin-top: -4px;
   }
@@ -334,14 +335,20 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding-top: 28px;
     gap: 12px;
     color: var(--text-dim);
   }
 
   .info-placeholder svg {
     opacity: 0.3;
+    align-self: center;
+  }
+  .info-placeholder img[alt="LED indicator"],
+  .info-placeholder img[alt="Ethernet port"] {
+    align-self: center;
   }
 
   .info-placeholder p {
@@ -651,7 +658,7 @@
     <div class="info-placeholder" id="placeholder">
       <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/2wBDAQMDAwQDBAgEBAgQCwkLEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBD/wAARCAAlABIDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD5BH7OXi5gGXwxqDDH/Ps/+FH/AAzl4u/6FfUP/AZ/8K+6cD1owPWv5v8A+Ij4/wDlR/I3/EWsy/kX3s+Dz+zr4nyf+Kbv/wDvw/8AhRX3juH90UVf/EScf/L+Jr/xFvNP5F94mDRg1kjxl4QYA/8ACU6Vz/0+xf8AxVH/AAmHg/8A6GnSf/A2L/4qvgv7PxX/AD7l/wCAn5j/AGXjf+fMvuZr7W/u0Vhnxv4MBx/wlOmf+BKf/FUUv7NxX/PuX3Mf9k4//nzL/wABZ+cA8a6xj/Wn/vo03/hNdY/56n/vo0UV/Vv1Oh/Ij+2/qGG/kQn/AAmesf8APU/99Giiij6pQ/lQ/qOG/kR//9k=" alt="LED indicator" style="width:18px;height:37px;opacity:0.75;margin-bottom:4px;" />
       <p class="placeholder-headline">Click any LED to view its states</p>
-      <p class="placeholder-sub">Hover over the device image to reveal<br>the interactive LED zones, then click one.</p>
+      <p class="placeholder-sub">Hover over the device image to reveal the interactive LED zones, then click one.</p>
     </div>
   </div>
 
@@ -1116,15 +1123,15 @@ function clearActive() {
 
 function clearInfo() {
   const isBack = (currentFrame === BACK_FRAME);
-  const headline = isBack ? 'Click a port to view details' : 'Click any LED to view its states';
+  const headline = isBack ? 'Click any component for its description' : 'Click any LED to view its states';
   const subline  = isBack
-    ? 'Hover over the back panel to reveal<br>the interactive port zones, then click one.'
-    : 'Hover over the device image to reveal<br>the interactive LED zones, then click one.';
+    ? 'Hover over the device image to reveal the interactive component zones, then click one.'
+    : 'Hover over the device image to reveal the interactive LED zones, then click one.';
   document.getElementById('infoPanel').innerHTML = `
     <div class="info-placeholder" id="placeholder">
       ${isBack ? `<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAFCElEQVR42tWaW2gcVRjHfzNzNptE4pONloq+eEdsiaZeiFhFxAtGX4rok+2rBUkFRSwogqJgqz7oq4/eXqyIF6RYhGq9UKpojbW0iCmlaR9SsDHbzs740P9pP44zu7ObxO5+8DE7Z858l3O+891mo4l71mMgEvYy5EIAnK6xrpl92MNwVl6nm0wDK4ARKRH14MpHwN/ArFfESfhrgFeBCWC4x83nH2AX8DQw7YCrgK+AS+gPGAIeBNYCdzjgdQmfATPAL9qqXjsLXqbrgUuBi4FtDlinB7PALcCRHt+BlcAeKbAuBurS7k8J74CkBwVPJNsRyRoBdWcmOA1mwvuA1fodncdDGwM/AZ/pd2TcP64gQOTAGPBpj+3AjTId7PmMSyav0qSFHhB8QbKsKnroSl467W0M+Bh4VzbY/B/tvQk8KpcZSabKCkTmugd47zyt/tXAZCBTJQUsDGueC0wqMUTTApppCa+iuXmwu4Oa1zYriCsokInYKWAc+AbYagJLE3gG2C3PlWpsFPhEuEJjqebsViqQmhxnq2iPi1dqcrRFKWAVmQJuBTYrBWkCFwHPAzcDW8yKTgIPCB8ynmOL5r6gd5uitVm0p6oI3okJheC3ekDXmkxrIDCDmrmvBe83gYahMdCtg3BdeghbVPhgkwQHLTcRPQ8cRBLkW7kJUl0VBn0LnSqQt/mdL2Ju0fiSm5CTd4iNefg6Og2SQGdcpgtMMA1MJjEu1i2nAsf1Tg7MSYCTipJOYx6OGfqzZnxO4w29G2ksFh5fLgUS4EUx/RE4pLETwGPAvcDbZlc+Ap7V/XZzaJ8EppVdnhCNQ8AjwE3Aa52kLa7iOfGR+KgCUOhSvxRamz4FvFJA7wDwVAGND4Q+EkdVzmgVBeZlm9aew9CfBLVEq/TBm0oZjdSkLPPdKmBrg0mVcfuAt8Q0LwluIaQlET0rCZA+RjwBXKe0ImtVo5cpUDOrMSYE+B34YplSa0/zbuDNILWvBdG8ZRyIgF9l7zVTVPi8h2UqMT1Nnx8tmMWclUxRVQUOyiNMyLPUzQpFAS6F4Bab4lUX7wmVkweL+LkWLbwZ4Vrzou+dpsYm406yx4IFzMx5yc19JI+1K+gLVT7ENRGrB8XNiNmNTHGhW8iAC0xkbwZFjN/52JS5ld2odXM+Bd4GvBzMewd4rsOd8HNfAjYEzwYVQ5LAO3UdB3yOk5j83cImKXWyYksyMiu/CbiwDe+uA5nX/H3gLtNq8XClGq3zXablsd4d4UzH+Y9AycPiHbVy2a7NSsXAX8D9Bc/3qnOXm7Zf1R3ITWEUSfg1LWTMOg1kUUnELBIwC7LQqjBXcmZCHmmnbRUv/GqFc++XDwA/GAaeyRDwuAJPJzswqHdtEeOfjQNXGN771B+NQ/quxLXdAHwXuNAmcDvwrRgNaHVG5Im6gdOiMWAUuQ34OiiOGopHP1ctKQcD4X2uMmwYzWgBaouIAzXRmDFjQ/y3vV+XTC1NyIbz79WAWmO28Tdgh/HhG4H1BYp2Cg3gQ7OgO4CHgWsN772SKSb4AOmCw5KbvPxzYbgL/noYeGOJs1F/3S6kpF5IrQk1JPjlyvvTFn63aXCpoR1t35pcKVlzoOGAnfLzo+pZ9sNHvlHd73TqRY5x5kvlZcJ+gKPAlAP2A3dy7kP3EL39f4l5zn3o3u//ajCtDnLf/tUgNs2oY33UEs2cib7QP3+3OZtD/QsfzXOb+TLOZAAAAABJRU5ErkJggg==" alt="Ethernet port" style="width:48px;height:48px;margin-bottom:6px;opacity:0.85;" />` : `<img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/2wBDAQMDAwQDBAgEBAgQCwkLEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBD/wAARCAAlABIDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD5BH7OXi5gGXwxqDDH/Ps/+FH/AAzl4u/6FfUP/AZ/8K+6cD1owPWv5v8A+Ij4/wDlR/I3/EWsy/kX3s+Dz+zr4nyf+Kbv/wDvw/8AhRX3juH90UVf/EScf/L+Jr/xFvNP5F94mDRg1kjxl4QYA/8ACU6Vz/0+xf8AxVH/AAmHg/8A6GnSf/A2L/4qvgv7PxX/AD7l/wCAn5j/AGXjf+fMvuZr7W/u0Vhnxv4MBx/wlOmf+BKf/FUUv7NxX/PuX3Mf9k4//nzL/wABZ+cA8a6xj/Wn/vo03/hNdY/56n/vo0UV/Vv1Oh/Ij+2/qGG/kQn/AAmesf8APU/99Giiij6pQ/lQ/qOG/kR//9k=" alt="LED indicator" style="width:18px;height:37px;opacity:0.75;margin-bottom:4px;" />`}
       <p class="placeholder-headline">Click any LED to view its states</p>
-      <p class="placeholder-sub">Hover over the device image to reveal<br>the interactive LED zones, then click one.</p>
+      <p class="placeholder-sub">Hover over the device image to reveal the interactive LED zones, then click one.</p>
     </div>`;
 }
 
@@ -1337,12 +1344,16 @@ function resizeCanvas() {
 
 function frameGeometry(img) {
   if (!img || !img.complete || !img.naturalWidth) return null;
-  const scale = Math.min(canvasW / img.naturalWidth, canvasH / img.naturalHeight);
+  // Use consistent reference dimensions (widest frame C: 1660x2600)
+  // so ALL frames scale identically — no jump between narrow/wide frames
+  const REF_W = 1660, REF_H = 2600;
+  const scale = Math.min(canvasW / REF_W, canvasH / REF_H);
+  const w = img.naturalWidth  * scale;
+  const h = img.naturalHeight * scale;
   return {
     scale,
-    w: img.naturalWidth  * scale,
-    h: img.naturalHeight * scale,
-    x: (canvasW - img.naturalWidth  * scale) / 2,
+    w, h,
+    x: (canvasW - w) / 2,
     y: 0
   };
 }
