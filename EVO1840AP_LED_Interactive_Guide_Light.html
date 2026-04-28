@@ -328,6 +328,9 @@ const frameImages = FRAME_SRCS.map(src => {
   return img;
 });
 
+const FRONT_FRAME = 0;
+const BACK_FRAME  = 4;
+
 let currentFrame = 0;
 let currentFrameImg = frameImages[0];
 let isAnimating = false;
@@ -548,6 +551,29 @@ window.addEventListener('resize', resizeCanvas);
 if (frameImages[0].complete && frameImages[0].naturalWidth) {
   setTimeout(resizeCanvas, 0);
 }
+// ── Fullscreen ──────────────────────────────────────────────────────────────
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(function(err) {
+      console.warn('Fullscreen error:', err);
+    });
+  } else {
+    document.exitFullscreen();
+  }
+}
+
+document.addEventListener('fullscreenchange', function() {
+  const btn = document.getElementById('fsBtn');
+  if (!btn) return;
+  const isFs = !!document.fullscreenElement;
+  btn.innerHTML = isFs
+    ? '<svg id="fsIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="14" x2="3" y2="21"/><line x1="21" y1="3" x2="14" y2="10"/></svg> EXIT'
+    : '<svg id="fsIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg> FULLSCREEN';
+  btn.onclick = toggleFullscreen;
+  setTimeout(resizeCanvas, 50);
+});
+
+
 </script>
 </body>
 </html>
