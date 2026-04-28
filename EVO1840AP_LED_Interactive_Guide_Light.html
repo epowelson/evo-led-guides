@@ -101,6 +101,26 @@
   .back-port-desc { font-size:15px; color:var(--text); line-height:1.55; }
   .back-port-note { font-size:13px; color:var(--text-muted); line-height:1.5; padding-top:8px; border-top:1px solid var(--border); }
 
+
+  .fullscreen-btn {
+    margin-left: auto;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 5px 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .fullscreen-btn:hover { border-color: var(--border-light); color: var(--text); }
+  .fullscreen-btn svg { flex-shrink: 0; }
+
   ::-webkit-scrollbar { width:6px; }
   ::-webkit-scrollbar-track { background:transparent; }
   ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
@@ -112,6 +132,10 @@
   <div class="header-tag">LED Reference</div>
   <h1>EVO1840AP — Front Panel LED Guide</h1>
   <p>Rev. April 2026</p>
+  <button class="fullscreen-btn" id="fsBtn" onclick="toggleFullscreen()">
+    <svg id="fsIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+    FULLSCREEN
+  </button>
 </header>
 
 <div class="app">
@@ -540,6 +564,28 @@ window.addEventListener('resize', resizeCanvas);
 if (frameImages[0].complete && frameImages[0].naturalWidth) {
   computeRef(); setTimeout(resizeCanvas, 0);
 }
+// ── Fullscreen ──────────────────────────────────────────────────────────────
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(function(err) {
+      console.warn('Fullscreen error:', err);
+    });
+  } else {
+    document.exitFullscreen();
+  }
+}
+
+document.addEventListener('fullscreenchange', function() {
+  const btn = document.getElementById('fsBtn');
+  if (!btn) return;
+  const isFs = !!document.fullscreenElement;
+  const expandSVG = '<svg id="fsIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>';
+  const contractSVG = '<svg id="fsIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="14" x2="3" y2="21"/><line x1="21" y1="3" x2="14" y2="10"/></svg>';
+  btn.innerHTML = (isFs ? contractSVG + ' EXIT' : expandSVG + ' FULLSCREEN');
+  btn.onclick = toggleFullscreen;
+  setTimeout(resizeCanvas, 50);
+});
+
 </script>
 </body>
 </html>
