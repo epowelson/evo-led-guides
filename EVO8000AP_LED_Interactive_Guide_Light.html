@@ -1303,7 +1303,7 @@ function renderStateCard(s) {
     const rendW = natW * scale;
     const rendH = natH * scale;
     const offX = (wW - rendW) / 2;
-    const offY = 0; // top-justified
+    const offY = (wH - rendH) / 2;
 
     // Hide all existing hotspots during mid-spin frames
     const allHs = document.querySelectorAll('.led-hotspot');
@@ -1364,6 +1364,11 @@ function resizeCanvas() {
   const wrapper = document.getElementById('deviceWrapper');
   canvasW = wrapper.offsetWidth;
   canvasH = wrapper.offsetHeight;
+  // If wrapper has no dimensions yet, layout hasn't painted — retry next frame
+  if (!canvasW || !canvasH) {
+    requestAnimationFrame(resizeCanvas);
+    return;
+  }
   canvas.width  = canvasW;
   canvas.height = canvasH;
   drawSingleFrame(currentFrameImg);
@@ -1382,7 +1387,7 @@ function frameGeometry(img) {
     scale,
     w, h,
     x: (canvasW - w) / 2,
-    y: 0
+    y: (canvasH - h) / 2
   };
 }
 
