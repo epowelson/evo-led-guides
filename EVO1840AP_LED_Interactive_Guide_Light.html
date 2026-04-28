@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EVO1840AP — LED Reference Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0f2f5;
+    --surface: #ffffff;
+    --surface2: #f5f7fa;
+    --border: #dde1e8;
+    --border-light: #c8cdd8;
+    --text: #1a1d24;
+    --text-muted: #5a6070;
+    --text-dim: #9aa0b0;
+    --accent: #0078cc;
+    --accent-dim: rgba(0,120,204,0.10);
+    --green: #16a34a;
+    --green-dim: rgba(22,163,74,0.12);
+    --blue: #2563eb;
+    --blue-dim: rgba(37,99,235,0.12);
+    --red: #dc2626;
+    --red-dim: rgba(220,38,38,0.12);
+    --off-color: #c8cdd8;
+    --radius: 6px;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; }
+  body { background:var(--bg); color:var(--text); font-family:var(--sans); height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+
+  header { border-bottom:1px solid var(--border); padding:16px 32px; display:flex; align-items:center; gap:16px; background:var(--surface); flex-shrink:0; }
+  .header-tag { font-family:var(--mono); font-size:10px; color:var(--accent); background:var(--accent-dim); border:1px solid rgba(0,120,204,0.25); padding:3px 8px; border-radius:3px; letter-spacing:0.12em; text-transform:uppercase; }
+  header h1 { font-size:15px; font-weight:500; letter-spacing:0.03em; color:var(--text); }
+  header p  { font-size:12px; color:var(--text-muted); margin-left:auto; font-family:var(--mono); }
+
+  .app { flex:1; display:grid; grid-template-columns:1fr 300px; gap:0; min-height:0; overflow:hidden; height:100%; }
+
+  .device-panel { border-right:1px solid var(--border); background:var(--bg); display:flex; flex-direction:column; align-items:stretch; padding:0; position:relative; overflow:hidden; min-height:0; height:100%; }
+  .device-image-area { flex:1; min-height:0; position:relative; overflow:hidden; padding:24px 16px 12px; }
+  .device-wrapper { position:relative; width:100%; height:100%; user-select:none; }
+  #deviceCanvas { background:var(--bg); position:absolute; top:0; left:0; }
+
+  .spin-btn-bar { flex-shrink:0; display:flex; justify-content:center; padding:10px 0 16px; border-top:1px solid var(--border); }
+  .spin-btn { position:relative; background:rgba(255,255,255,0.88); backdrop-filter:blur(6px); border:1px solid rgba(0,0,0,0.15); color:var(--text-muted); font-family:var(--mono); font-size:11px; letter-spacing:0.08em; padding:8px 18px; border-radius:9999px; cursor:pointer; white-space:nowrap; transition:border-color 0.2s, color 0.2s, box-shadow 0.2s; }
+  .spin-btn:hover { border-color:rgba(0,0,0,0.3); color:var(--text); box-shadow:0 2px 12px rgba(0,0,0,0.15); }
+  .spin-btn:disabled { opacity:0.4; cursor:not-allowed; }
+
+  /* hotspots */
+  .led-hotspot { position:absolute; border-radius:9999px; cursor:pointer; border:2px solid transparent; background:transparent; box-sizing:border-box; transition:border-color 0.2s, box-shadow 0.2s, background 0.2s; z-index:10; --hs-r:22; --hs-g:163; --hs-b:74; }
+  .led-hotspot.shape-rect { border-radius:6px; }
+  .led-hotspot.hl-yellow { --hs-r:202; --hs-g:138; --hs-b:4; }
+  .led-hotspot.hl-blue   { --hs-r:37;  --hs-g:99;  --hs-b:235; }
+  .led-hotspot.hl-red    { --hs-r:220; --hs-g:38;  --hs-b:38; }
+  .led-hotspot:hover { border-color:rgb(var(--hs-r),var(--hs-g),var(--hs-b)); background:rgba(var(--hs-r),var(--hs-g),var(--hs-b),0.06); box-shadow:0 0 0 2px rgba(var(--hs-r),var(--hs-g),var(--hs-b),0.18),0 0 16px rgba(var(--hs-r),var(--hs-g),var(--hs-b),0.35); }
+  .led-hotspot.active { border-color:rgb(var(--hs-r),var(--hs-g),var(--hs-b)); background:rgba(var(--hs-r),var(--hs-g),var(--hs-b),0.08); animation:rect-pulse 1.8s ease-in-out infinite; }
+  .device-image-area.has-selection .led-hotspot:not(.active) { border-color:transparent; background:transparent; box-shadow:none; animation:none; }
+  .device-image-area.has-selection .led-hotspot:not(.active):hover { border-color:rgba(180,180,190,0.55); background:rgba(180,180,190,0.07); box-shadow:none; animation:none; }
+  @keyframes rect-pulse {
+    0%,100% { box-shadow:0 0 0 0px rgba(var(--hs-r),var(--hs-g),var(--hs-b),0.65),0 0 14px rgba(var(--hs-r),var(--hs-g),var(--hs-b),0.45); }
+    50%      { box-shadow:0 0 0 10px rgba(var(--hs-r),var(--hs-g),var(--hs-b),0),0 0 32px rgba(var(--hs-r),var(--hs-g),var(--hs-b),0.75); }
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.1} }
+
+  /* info panel */
+  .info-panel { overflow-y:auto; padding:24px 22px; display:flex; flex-direction:column; gap:20px; min-height:0; }
+  .info-placeholder { flex:1; display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-start; padding-top:28px; gap:12px; color:var(--text-dim); }
+  .info-placeholder svg { opacity:0.3; align-self:center; }
+  .info-placeholder img[alt="LED indicator"], .info-placeholder img[alt="Ethernet port"] { align-self:center; }
+  .info-placeholder p.placeholder-headline { font-size:15px; color:var(--text-muted); font-family:var(--mono); letter-spacing:0.04em; text-align:left; }
+  .info-placeholder p.placeholder-sub { font-size:12px; color:var(--text-dim); text-align:left; line-height:1.6; margin-top:-4px; }
+
+  .led-header { display:flex; align-items:flex-start; gap:16px; padding-bottom:20px; border-bottom:1px solid var(--border); }
+  .led-icon { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px; }
+  .led-icon-dot { width:14px; height:14px; border-radius:50%; }
+  .led-title { flex:1; }
+  .led-title h2 { font-family:var(--mono); font-size:16px; font-weight:500; letter-spacing:0.05em; }
+  .led-title p  { font-size:15px; color:var(--text-muted); margin-top:4px; line-height:1.5; }
+
+  .states-label { font-family:var(--mono); font-size:10px; letter-spacing:0.15em; color:var(--text-dim); text-transform:uppercase; margin-bottom:10px; }
+  .state-cards { display:flex; flex-direction:column; gap:10px; }
+  .state-card { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:16px; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+  .state-card-header { display:flex; align-items:flex-start; gap:12px; margin-bottom:10px; }
+  .led-anim { width:20px; height:20px; border-radius:50%; flex-shrink:0; margin-top:2px; }
+  .led-anim.green-solid { background:#16a34a; box-shadow:0 0 10px rgba(22,163,74,0.5); }
+  .led-anim.green-blink { background:#16a34a; box-shadow:0 0 10px rgba(22,163,74,0.5); animation:blink 0.8s ease-in-out infinite; }
+  .led-anim.off { background:var(--off-color); border:1px solid var(--border-light); }
+  .state-behavior { font-family:var(--mono); font-size:15px; font-weight:500; letter-spacing:0.05em; text-transform:uppercase; }
+  .state-behavior.green { color:#15803d; }
+  .state-behavior.off { color:#6b7280; }
+  .state-meaning { font-size:15px; color:var(--text); line-height:1.55; margin-top:4px; }
+  .state-troubleshoot { margin-top:10px; padding-top:10px; border-top:1px solid var(--border); }
+  .state-troubleshoot-label { font-family:var(--mono); font-size:10px; letter-spacing:0.12em; color:#92640a; text-transform:uppercase; margin-bottom:6px; }
+  .state-troubleshoot ol { padding-left:16px; font-size:15px; color:var(--text-muted); line-height:1.7; }
+
+  .back-port-card { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:16px; display:flex; flex-direction:column; gap:8px; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+  .back-port-label { font-family:var(--mono); font-size:15px; font-weight:500; color:var(--text); letter-spacing:0.05em; }
+  .back-port-desc { font-size:15px; color:var(--text); line-height:1.55; }
+  .back-port-note { font-size:13px; color:var(--text-muted); line-height:1.5; padding-top:8px; border-top:1px solid var(--border); }
+
+  ::-webkit-scrollbar { width:6px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-tag">LED Reference</div>
+  <h1>EVO1840AP — Front Panel LED Guide</h1>
+  <p>Rev. April 2026</p>
+</header>
+
+<div class="app">
+  <div class="device-panel">
+    <div class="device-image-area">
+      <div class="device-wrapper" id="deviceWrapper">
+        <canvas id="deviceCanvas" style="width:100%;height:100%;display:block;"></canvas>
+
+        <div class="led-hotspot" data-led="power"  data-top="23.28" data-left="35.37" data-wpct="24.54" data-hpct="2.77" style="display:none;"></div>
+        <div class="led-hotspot" data-led="wan" data-top="27.87" data-left="35.37" data-wpct="24.54" data-hpct="2.77" style="display:none;"></div>
+        <div class="led-hotspot" data-led="internet" data-top="32.44" data-left="35.37" data-wpct="24.54" data-hpct="2.8" style="display:none;"></div>
+        <div class="led-hotspot" data-led="lan1" data-top="36.89" data-left="35.37" data-wpct="24.54" data-hpct="2.66" style="display:none;"></div>
+        <div class="led-hotspot" data-led="lan2" data-top="41.57" data-left="35.37" data-wpct="24.54" data-hpct="2.58" style="display:none;"></div>
+        <div class="led-hotspot" data-led="lan3" data-top="46.13" data-left="35.37" data-wpct="24.54" data-hpct="2.72" style="display:none;"></div>
+        <div class="led-hotspot" data-led="wifi24" data-top="50.73" data-left="35.37" data-wpct="24.54" data-hpct="2.83" style="display:none;"></div>
+        <div class="led-hotspot" data-led="wifi5" data-top="55.21" data-left="35.37" data-wpct="24.54" data-hpct="2.66" style="display:none;"></div>
+        <div class="led-hotspot" data-led="wifi6" data-top="59.75" data-left="35.37" data-wpct="24.54" data-hpct="2.66" style="display:none;"></div>
+        <div class="led-hotspot" data-led="bt" data-top="64.4" data-left="35.37" data-wpct="24.54" data-hpct="2.55" style="display:none;"></div>
+
+        <!-- Back panel hotspots -->
+        <div class="led-hotspot hl-yellow shape-rect" data-led="lan123" data-back="1" data-top="35.97" data-left="42.84" data-wpct="19.59" data-hpct="26.30" style="display:none;"></div>
+        <div class="led-hotspot hl-blue   shape-rect" data-led="wan25g"  data-back="1" data-top="61.29" data-left="42.84" data-wpct="19.59" data-hpct="9.78"  style="display:none;"></div>
+        <div class="led-hotspot hl-red shape-rect" data-led="pwr12v"  data-back="1" data-top="84.48" data-left="42.98" data-wpct="18.47" data-hpct="6.25"  style="display:none;"></div>
+
+
+
+      </div>
+    </div>
+    <div class="spin-btn-bar">
+      <button class="spin-btn" id="spinBtn" onclick="handleSpinBtn()">View Back Panel ›</button>
+    </div>
+  </div>
+
+  <div class="info-panel" id="infoPanel">
+    <div class="info-placeholder" id="placeholder">
+      <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/2wBDAQMDAwQDBAgEBAgQCwkLEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBD/wAARCAAlABIDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD5BH7OXi5gGXwxqDDH/Ps/+FH/AAzl4u/6FfUP/AZ/8K+6cD1owPWv5v8A+Ij4/wDlR/I3/EWsy/kX3s+Dz+zr4nyf+Kbv/wDvw/8AhRX3juH90UVf/EScf/L+Jr/xFvNP5F94mDRg1kjxl4QYA/8ACU6Vz/0+xf8AxVH/AAmHg/8A6GnSf/A2L/4qvgv7PxX/AD7l/wCAn5j/AGXjf+fMvuZr7W/u0Vhnxv4MBx/wlOmf+BKf/FUUv7NxX/PuX3Mf9k4//nzL/wABZ+cA8a6xj/Wn/vo03/hNdY/56n/vo0UV/Vv1Oh/Ij+2/qGG/kQn/AAmesf8APU/99Giiij6pQ/lQ/qOG/kR//9k=" alt="LED indicator" style="width:18px;height:37px;opacity:0.75;margin-bottom:4px;" />
+      <p class="placeholder-headline">Click any LED to view its states</p>
+      <p class="placeholder-sub">Hover over the device image to reveal the interactive LED zones, then click one.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── LED data ───────────────────────────────────────────────────────────────
+const LED_DATA = {
+  power: {
+    label:'POWER', desc:'Indicates whether the router is receiving and processing power.', color:'green',
+    states:[
+      {colorClass:'green',animClass:'green-solid',behavior:'Solid',meaning:'The router is powered on and operating normally.',fix:null},
+      {colorClass:'off',animClass:'off',behavior:'Off',meaning:'The router is not receiving power.',
+        fix:['Check that the power cable is securely connected to the router and outlet.',
+             'Confirm the power adapter is not damaged.','Try a different power outlet.']}
+    ]
+  },
+  wan: {
+    label:'WAN', desc:'Shows the upstream ethernet connection status between the router and your modem/ONT.', color:'green',
+    states:[
+      {colorClass:'green',animClass:'green-solid',behavior:'Solid',meaning:'Upstream ethernet is connected to the router.',fix:null},
+      {colorClass:'green',animClass:'green-blink',behavior:'Blinking',meaning:'The router is actively sending or receiving data on the WAN port.',fix:null},
+      {colorClass:'off',animClass:'off',behavior:'Off',meaning:'Ethernet cable is disconnected from the WAN port, or a connection issue is present.',
+        fix:['Verify the ethernet cable is securely connected to the WAN port.',
+             'Confirm the upstream modem/ONT/OLT is powered on and showing normal status indicators.',
+             'Check whether the ethernet cable is damaged — replace if necessary.',
+             'Reboot the upstream modem, ONT, or OLT.']}
+    ]
+  },
+  internet: {
+    label:'INTERNET', desc:'Indicates upstream network connectivity and Plume cloud connection status.', color:'green',
+    states:[
+      {colorClass:'green',animClass:'green-solid',behavior:'Solid',meaning:'The router is connected to the upstream network and Plume Cloud.',fix:null},
+      {colorClass:'green',animClass:'green-blink',behavior:'Blinking',meaning:'The router is attempting to connect to the upstream network or Plume Cloud.',
+        fix:['Check that the WAN ethernet cable is properly connected.',
+             'Verify that internet service is active and functioning.',
+             'Confirm the AP has been added to a location in Frontline / Plume Home App.',
+             'Reboot the upstream modem (ONT/OLT).',
+             'Reboot the AP and verify the Internet LED status.']},
+      {colorClass:'off',animClass:'off',behavior:'Off',meaning:'N/A — this state is not indicative of any active condition.',fix:null}
+    ]
+  },
+  lan1: {
+    label:'LAN1', desc:'Status of the LAN 1 gigabit ethernet port.', color:'green',
+    states:[
+      {colorClass:'green',animClass:'green-solid',behavior:'Solid',meaning:'A device is connected to LAN1.',
+        fix:['If the connected device has no network access: reboot the client device, disconnect/reconnect the cable, or try a different port.']},
+      {colorClass:'green',animClass:'green-blink',behavior:'Blinking',meaning:'The router is actively sending or receiving data on this port.',fix:null},
+      {colorClass:'off',animClass:'off',behavior:'Off',meaning:'No device is connected, or a connection issue is present.',
+        fix:['Check the cable connected to the LAN1 port.','Try a different LAN port or replace the ethernet cable.']}
+    ]
+  },
+  lan2: {
+    label:'LAN2', desc:'Status of the LAN 2 gigabit ethernet port.', color:'green',
+    states:[
+      {colorClass:'green',animClass:'green-solid',behavior:'Solid',meaning:'A device is connected to LAN2.',
+        fix:['If the connected device has no network access: reboot the client device, disconnect/reconnect the cable, or try a different port.']},
+      {colorClass:'green',animClass:'green-blink',behavior:'Blinking',meaning:'The router is actively sending or receiving data on this port.',fix:null},
+      {colorClass:'off',animClass:'off',behavior:'Off',meaning:'No device is connected, or a connection issue is present.',
+        fix:['Check the cable connected to the LAN2 port.','Try a different LAN port or replace the ethernet cable.']}
+    ]
+  },
+  lan3: {
+    label:'LAN3', desc:'Status of the LAN 3 gigabit ethernet port.', color:'green',
+    states:[
+      {colorClass:'green',animClass:'green-solid',behavior:'Solid',meaning:'A device is connected to LAN3.',
+        fix:['If the connected device has no network access: reboot the client device, disconnect/reconnect the cable, or try a different port.']},
+      {colorClass:'green',animClass:'green-blink',behavior:'Blinking',meaning:'The router is actively sending or receiving data on this port.',fix:null},
+      {colorClass:'off',animClass:'off',behavior:'Off',meaning:'No device is connected, or a connection issue is present.',
+        fix:['Check the cable connected to the LAN3 port.','Try a different LAN port or replace the ethernet cable.']}
+    ]
+  },
+  wifi24: {
+    label:'2.4G', desc:'Indicates whether the 2.4 GHz Wi-Fi radio is active.', color:'green',
+    states:[
+      {colorClass:'green',animClass:'green-solid',behavior:'Solid',meaning:'The 2.4 GHz Wi-Fi radio is on and broadcasting.',fix:null},
+      {colorClass:'green',animClass:'green-blink',behavior:'Blinking',meaning:'The router is actively sending or receiving Wi-Fi data on 2.4 GHz.',fix:null},
+      {colorClass:'off',animClass:'off',behavior:'Off',meaning:'The 2.4 GHz Wi-Fi radio is off.',
+        fix:['Confirm the 2.4G SSID is visible on client devices.',
+             'Check Frontline / Plume to see whether Wi-Fi radios were disabled for the location.',
+             'Check for any active scheduled downtime or parental controls in Plume.','Reboot the node.']}
+    ]
+  },
+  wifi5: {
+    label:'5G', desc:'Indicates whether the 5 GHz Wi-Fi radio is active.', color:'green',
+    states:[
+      {colorClass:'green',animClass:'green-solid',behavior:'Solid',meaning:'The 5 GHz Wi-Fi radio is on and broadcasting.',fix:null},
+      {colorClass:'green',animClass:'green-blink',behavior:'Blinking',meaning:'The router is actively sending or receiving Wi-Fi data on 5 GHz.',fix:null},
+      {colorClass:'off',animClass:'off',behavior:'Off',meaning:'The 5 GHz Wi-Fi radio is off.',
+        fix:['Confirm the 5G SSID is visible on client devices.',
+             'Check Frontline / Plume to see whether Wi-Fi radios were disabled for the location.',
+             'Check for any active scheduled downtime or parental controls in Plume.','Reboot the node.']}
+    ]
+  },
+  wifi6: {
+    label:'6G', desc:'Indicates whether the 6 GHz Wi-Fi 6E radio is active.', color:'green',
+    states:[
+      {colorClass:'green',animClass:'green-solid',behavior:'Solid',meaning:'The 6 GHz Wi-Fi 6E radio is on and broadcasting.',fix:null},
+      {colorClass:'green',animClass:'green-blink',behavior:'Blinking',meaning:'The router is actively sending or receiving Wi-Fi data on 6 GHz.',fix:null},
+      {colorClass:'off',animClass:'off',behavior:'Off',meaning:'The 6 GHz Wi-Fi 6E radio is off.',
+        fix:['Confirm the 6G SSID is visible on client devices.',
+             'Check Frontline / Plume to see whether Wi-Fi radios were disabled for the location.',
+             'Check for any active scheduled downtime or parental controls in Plume.','Reboot the node.']}
+    ]
+  },
+  bt: {
+    label:'BT', desc:'Bluetooth Low Energy status indicator for initial device setup and pairing.', color:'green',
+    states:[
+      {colorClass:'green',animClass:'green-solid',behavior:'Solid',meaning:'N/A — this state is not indicative of any active condition.',fix:null},
+      {colorClass:'green',animClass:'green-blink',behavior:'Blinking',meaning:'The router is in BLE Pairing mode for initial setup or re-pairing.',
+        fix:['Ensure a smartphone with the Plume Home App is in close proximity.',
+             'Attempt BLE pairing via the Plume Home App.']},
+      {colorClass:'off',animClass:'off',behavior:'Off',meaning:'The Bluetooth function is turned off.',fix:null}
+    ]
+  }
+};
+
+const BACK_PORT_DATA = {
+  lan123: {
+    label:'LAN 1–3', connector:'3× Gigabit Ethernet LAN Ports (RJ-45)',
+    desc:'Three standard Gigabit Ethernet ports for connecting wired client devices such as computers, smart TVs, gaming consoles, or IP cameras. Each port supports 10/100/1000 Mbps auto-negotiation.',
+    note:null
+  },
+  wan25g: {
+    label:'2.5G WAN', connector:'2.5 Gigabit Ethernet WAN Port (RJ-45)',
+    desc:'Multi-gigabit WAN uplink port for connecting to the upstream modem, ONT, or service provider ethernet handoff. Supports up to 2.5 Gbps. Can also function as an additional LAN port in certain configurations.',
+    note:'Requires Cat5e or better cabling. Cat6 or Cat6a recommended for 2.5 Gbps operation.'
+  },
+  pwr12v: {
+    label:'12V DC IN', connector:'DC barrel jack — center-positive, 12V',
+    desc:'DC power input. Connect the included 12V power adapter here before powering on the device.',
+    note:'Use only the supplied adapter. An incompatible adapter may damage the device and void the warranty.'
+  }
+};
+
+// ── Frame URLs (Cloudinary hosted, no embedding) ───────────────────────────
+const FRAME_URLS = [
+  'https://res.cloudinary.com/dho42uank/image/upload/v1777398095/A_cjrn0q.png',  // 0 = front
+  'https://res.cloudinary.com/dho42uank/image/upload/v1777398471/B_tb2xvo.png',  // 1
+  'https://res.cloudinary.com/dho42uank/image/upload/v1777398472/C_k6zr4y.png',  // 2
+  'https://res.cloudinary.com/dho42uank/image/upload/v1777398473/D_d9cnkl.png',  // 3
+  'https://res.cloudinary.com/dho42uank/image/upload/v1777398471/E_a3d442.png',  // 4 = back
+];
+const FRONT_FRAME = 0;
+const BACK_FRAME  = 4;
+
+// Preload all frames with CORS
+const frameImages = FRAME_URLS.map(url => {
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.src = url;
+  return img;
+});
+
+let currentFrame = 0;
+let currentFrameImg = frameImages[0];
+let isAnimating = false;
+
+// ── Canvas ─────────────────────────────────────────────────────────────────
+const canvas = document.getElementById('deviceCanvas');
+const ctx    = canvas.getContext('2d');
+const BG     = '#f0f2f5';
+let canvasW  = 0, canvasH = 0;
+let REF_W    = 0, REF_H = 0;  // computed from loaded images
+
+function computeRef() {
+  let maxW = 0, maxH = 0;
+  frameImages.forEach(img => {
+    if (img.complete && img.naturalWidth) {
+      maxW = Math.max(maxW, img.naturalWidth);
+      maxH = Math.max(maxH, img.naturalHeight);
+    }
+  });
+  if (maxW > 0) { REF_W = maxW; REF_H = maxH; }
+}
+
+function resizeCanvas() {
+  const wrapper = document.getElementById('deviceWrapper');
+  canvasW = wrapper.offsetWidth;
+  canvasH = wrapper.offsetHeight;
+  canvas.width  = canvasW;
+  canvas.height = canvasH;
+  computeRef();
+  drawSingleFrame(currentFrameImg);
+  repositionHotspots();
+}
+
+function frameGeometry(img) {
+  if (!img || !img.complete || !img.naturalWidth) return null;
+  const rW = REF_W || img.naturalWidth;
+  const rH = REF_H || img.naturalHeight;
+  const scale = Math.min(canvasW / rW, canvasH / rH);
+  const w = img.naturalWidth  * scale;
+  const h = img.naturalHeight * scale;
+  return { scale, w, h, x:(canvasW-w)/2, y:(canvasH-h)/2 };
+}
+
+function drawSingleFrame(img) {
+  ctx.fillStyle = BG;
+  ctx.fillRect(0, 0, canvasW, canvasH);
+  const g = frameGeometry(img);
+  if (!g) return;
+  ctx.globalAlpha = 1;
+  ctx.drawImage(img, g.x, g.y, g.w, g.h);
+}
+
+function crossfadeTo(newImg, duration) {
+  return new Promise(resolve => {
+    const outImg = currentFrameImg;
+    const t0 = performance.now();
+    function tick(now) {
+      const t = Math.min((now-t0)/duration, 1);
+      const ease = t<0.5 ? 2*t*t : -1+(4-2*t)*t;
+      ctx.fillStyle = BG; ctx.fillRect(0,0,canvasW,canvasH);
+      const go = frameGeometry(outImg);
+      if (go) { ctx.globalAlpha=1-ease; ctx.drawImage(outImg,go.x,go.y,go.w,go.h); }
+      const gn = frameGeometry(newImg);
+      if (gn) { ctx.globalAlpha=ease;   ctx.drawImage(newImg,gn.x,gn.y,gn.w,gn.h); }
+      ctx.globalAlpha = 1;
+      if (t<1) { requestAnimationFrame(tick); }
+      else { currentFrameImg=newImg; drawSingleFrame(newImg); resolve(); }
+    }
+    requestAnimationFrame(tick);
+  });
+}
+
+// ── Spin ───────────────────────────────────────────────────────────────────
+function handleSpinBtn() {
+  if (isAnimating) return;
+  if (currentFrame === FRONT_FRAME) animateSpin('forward');
+  else animateSpin('backward');
+}
+
+async function animateSpin(direction) {
+  if (isAnimating) return;
+  isAnimating = true;
+  const btn = document.getElementById('spinBtn');
+  if (btn) btn.disabled = true;
+  activeLed = null; clearActive(); clearInfo();
+
+  const seq = direction==='forward' ? [1,2,3,4] : [3,2,1,0];
+  for (const frame of seq) {
+    await crossfadeTo(frameImages[frame], 60);
+    currentFrame = frame;
+  }
+
+  isAnimating = false;
+  currentFrame = direction==='forward' ? BACK_FRAME : FRONT_FRAME;
+  updateForFrame();
+  if (btn) btn.disabled = false;
+}
+
+function updateForFrame() {
+  currentFrameImg = frameImages[currentFrame];
+  drawSingleFrame(currentFrameImg);
+  const btn = document.getElementById('spinBtn');
+  if (currentFrame===FRONT_FRAME) { if(btn) btn.textContent='View Back Panel ›'; clearInfo(); }
+  else if (currentFrame===BACK_FRAME) { if(btn) btn.textContent='‹ View Front Panel'; clearInfo(); }
+  repositionHotspots();
+}
+
+// ── State ──────────────────────────────────────────────────────────────────
+let activeLed = null;
+
+function repositionHotspots() {
+  const imgEl = frameImages[currentFrame];
+  const wrapper = document.getElementById('deviceWrapper');
+  if (!imgEl || !imgEl.naturalWidth) return;
+  if (!REF_W) computeRef();
+  if (!REF_W) return;
+
+  const wW = canvasW || wrapper.offsetWidth;
+  const wH = canvasH || wrapper.offsetHeight;
+  const scale = Math.min(wW/REF_W, wH/REF_H);
+  const allHs = document.querySelectorAll('.led-hotspot');
+  allHs.forEach(h => h.style.display='none');
+
+  const showFrame = (isBack) => {
+    const img = isBack ? frameImages[BACK_FRAME] : frameImages[FRONT_FRAME];
+    const rendW = img.naturalWidth  * scale;
+    const rendH = img.naturalHeight * scale;
+    const offX  = (wW - rendW) / 2;
+    const offY  = (wH - rendH) / 2;
+    allHs.forEach(hs => {
+      const hsIsBack = !!hs.dataset.back;
+      if (hsIsBack !== isBack) return;
+      hs.style.display = '';
+      hs.style.left   = (offX + parseFloat(hs.dataset.left)/100*rendW) + 'px';
+      hs.style.top    = (offY + parseFloat(hs.dataset.top) /100*rendH) + 'px';
+      hs.style.width  = (parseFloat(hs.dataset.wpct)/100*rendW) + 'px';
+      hs.style.height = (parseFloat(hs.dataset.hpct)/100*rendH) + 'px';
+    });
+  };
+
+  if (currentFrame===FRONT_FRAME) showFrame(false);
+  else if (currentFrame===BACK_FRAME) showFrame(true);
+}
+
+// ── Click events ───────────────────────────────────────────────────────────
+document.querySelectorAll('.led-hotspot').forEach(hs => {
+  hs.addEventListener('click', () => {
+    const id = hs.dataset.led;
+    const isBack = !!hs.dataset.back;
+    if (activeLed===id) {
+      activeLed=null; clearActive(); clearInfo();
+    } else {
+      activeLed=id; clearActive();
+      hs.classList.add('active');
+      document.querySelector('.device-image-area').classList.add('has-selection');
+      if (isBack) renderBackPortInfo(id);
+      else renderInfo(id);
+    }
+  });
+});
+
+function clearActive() {
+  document.querySelectorAll('.led-hotspot').forEach(el=>el.classList.remove('active'));
+  document.querySelector('.device-image-area').classList.remove('has-selection');
+}
+
+function clearInfo() {
+  const isBack = currentFrame===BACK_FRAME;
+  const headline = isBack ? 'Click any component for its description' : 'Click any LED to view its states';
+  const subline  = isBack
+    ? 'Hover over the device image to reveal the interactive component zones, then click one.'
+    : 'Hover over the device image to reveal the interactive LED zones, then click one.';
+  document.getElementById('infoPanel').innerHTML = `
+    <div class="info-placeholder" id="placeholder">
+      ${isBack
+        ? `<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAFCElEQVR42tWaW2gcVRjHfzNzNptE4pONloq+eEdsiaZeiFhFxAtGX4rok+2rBUkFRSwogqJgqz7oq4/eXqyIF6RYhGq9UKpojbW0iCmlaR9SsDHbzs740P9pP44zu7ObxO5+8DE7Z858l3O+891mo4l71mMgEvYy5EIAnK6xrpl92MNwVl6nm0wDK4ARKRH14MpHwN/ArFfESfhrgFeBCWC4x83nH2AX8DQw7YCrgK+AS+gPGAIeBNYCdzjgdQmfATPAL9qqXjsLXqbrgUuBi4FtDlinB7PALcCRHt+BlcAeKbAuBurS7k8J74CkBwVPJNsRyRoBdWcmOA1mwvuA1fodncdDGwM/AZ/pd2TcP64gQOTAGPBpj+3AjTId7PmMSyav0qSFHhB8QbKsKnroSl467W0M+Bh4VzbY/B/tvQk8KpcZSabKCkTmugd47zyt/tXAZCBTJQUsDGueC0wqMUTTApppCa+iuXmwu4Oa1zYriCsokInYKWAc+AbYagJLE3gG2C3PlWpsFPhEuEJjqebsViqQmhxnq2iPi1dqcrRFKWAVmQJuBTYrBWkCFwHPAzcDW8yKTgIPCB8ynmOL5r6gd5uitVm0p6oI3okJheC3ekDXmkxrIDCDmrmvBe83gYahMdCtg3BdeghbVPhgkwQHLTcRPQ8cRBLkW7kJUl0VBn0LnSqQt/mdL2Ju0fiSm5CTd4iNefg6Og2SQGdcpgtMMA1MJjEu1i2nAsf1Tg7MSYCTipJOYx6OGfqzZnxO4w29G2ksFh5fLgUS4EUx/RE4pLETwGPAvcDbZlc+Ap7V/XZzaJ8EppVdnhCNQ8AjwE3Aa52kLa7iOfGR+KgCUOhSvxRamz4FvFJA7wDwVAGND4Q+EkdVzmgVBeZlm9aew9CfBLVEq/TBm0oZjdSkLPPdKmBrg0mVcfuAt8Q0LwluIaQlET0rCZA+RjwBXKe0ImtVo5cpUDOrMSYE+B34YplSa0/zbuDNILWvBdG8ZRyIgF9l7zVTVPi8h2UqMT1Nnx8tmMWclUxRVQUOyiNMyLPUzQpFAS6F4Bab4lUX7wmVkweL+LkWLbwZ4Vrzou+dpsYm406yx4IFzMx5yc19JI+1K+gLVT7ENRGrB8XNiNmNTHGhW8iAC0xkbwZFjN/52JS5ld2odXM+Bd4GvBzMewd4rsOd8HNfAjYEzwYVQ5LAO3UdB3yOk5j83cImKXWyYksyMiu/CbiwDe+uA5nX/H3gLtNq8XClGq3zXablsd4d4UzH+Y9AycPiHbVy2a7NSsXAX8D9Bc/3qnOXm7Zf1R3ITWEUSfg1LWTMOg1kUUnELBIwC7LQqjBXcmZCHmmnbRUv/GqFc++XDwA/GAaeyRDwuAJPJzswqHdtEeOfjQNXGN771B+NQ/quxLXdAHwXuNAmcDvwrRgNaHVG5Im6gdOiMWAUuQ34OiiOGopHP1ctKQcD4X2uMmwYzWgBaouIAzXRmDFjQ/y3vV+XTC1NyIbz79WAWmO28Tdgh/HhG4H1BYp2Cg3gQ7OgO4CHgWsN772SKSb4AOmCw5KbvPxzYbgL/noYeGOJs1F/3S6kpF5IrQk1JPjlyvvTFn63aXCpoR1t35pcKVlzoOGAnfLzo+pZ9sNHvlHd73TqRY5x5kvlZcJ+gKPAlAP2A3dy7kP3EL39f4l5zn3o3u//ajCtDnLf/tUgNs2oY33UEs2cib7QP3+3OZtD/QsfzXOb+TLOZAAAAABJRU5ErkJggg==" alt="Ethernet port" style="width:48px;height:48px;margin-bottom:6px;opacity:0.85;" />`
+        : `<img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/2wBDAQMDAwQDBAgEBAgQCwkLEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBD/wAARCAAlABIDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD5BH7OXi5gGXwxqDDH/Ps/+FH/AAzl4u/6FfUP/AZ/8K+6cD1owPWv5v8A+Ij4/wDlR/I3/EWsy/kX3s+Dz+zr4nyf+Kbv/wDvw/8AhRX3juH90UVf/EScf/L+Jr/xFvNP5F94mDRg1kjxl4QYA/8ACU6Vz/0+xf8AxVH/AAmHg/8A6GnSf/A2L/4qvgv7PxX/AD7l/wCAn5j/AGXjf+fMvuZr7W/u0Vhnxv4MBx/wlOmf+BKf/FUUv7NxX/PuX3Mf9k4//nzL/wABZ+cA8a6xj/Wn/vo03/hNdY/56n/vo0UV/Vv1Oh/Ij+2/qGG/kQn/AAmesf8APU/99Giiij6pQ/lQ/qOG/kR//9k=" alt="LED indicator" style="width:18px;height:37px;opacity:0.75;margin-bottom:4px;" />`
+      }
+      <p class="placeholder-headline">${headline}</p>
+      <p class="placeholder-sub">${subline}</p>
+    </div>`;
+}
+
+function renderInfo(id) {
+  const d = LED_DATA[id]; if(!d) return;
+  const panel = document.getElementById('infoPanel');
+  let html = `<div class="led-header">
+    <div class="led-icon" style="background:rgba(22,163,74,0.12)">
+      <div class="led-icon-dot" style="background:#16a34a;box-shadow:0 0 12px rgba(22,163,74,0.6);"></div>
+    </div>
+    <div class="led-title"><h2>${d.label}</h2><p>${d.desc}</p></div>
+  </div>
+  <div><div class="states-label">LED States</div><div class="state-cards">`;
+  d.states.forEach(s => {
+    const colorLabel = s.animClass.includes('green') ? 'Green' : '';
+    const beh = colorLabel ? colorLabel+' / '+s.behavior : s.behavior;
+    let fix = '';
+    if (s.fix&&s.fix.length) fix=`<div class="state-troubleshoot"><div class="state-troubleshoot-label">Troubleshooting</div><ol>${s.fix.map(f=>`<li>${f}</li>`).join('')}</ol></div>`;
+    html+=`<div class="state-card"><div class="state-card-header">
+      <div class="led-anim ${s.animClass}"></div>
+      <div><div class="state-behavior ${s.colorClass}">${beh}</div><div class="state-meaning">${s.meaning}</div></div>
+    </div>${fix}</div>`;
+  });
+  html += '</div></div>';
+  panel.innerHTML = html;
+}
+
+function renderBackPortInfo(id) {
+  const d = BACK_PORT_DATA[id]; if(!d) return;
+  document.getElementById('infoPanel').innerHTML = `
+    <div class="led-header">
+      <div class="led-icon" style="background:rgba(0,0,0,0.05)">
+        <div class="led-icon-dot" style="background:#aab0be;box-shadow:none;"></div>
+      </div>
+      <div class="led-title"><h2>${d.label}</h2><p>${d.connector}</p></div>
+    </div>
+    <div class="back-port-card">
+      <div class="back-port-desc">${d.desc}</div>
+      ${d.note ? `<div class="back-port-note">${d.note}</div>` : ''}
+    </div>`;
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+let loadedCount = 0;
+frameImages.forEach(img => {
+  img.addEventListener('load', () => {
+    loadedCount++;
+    if (loadedCount===1) { computeRef(); resizeCanvas(); } // front loads first → draw immediately
+    else { computeRef(); } // update REF as wider frames load
+  });
+  img.addEventListener('error', e => console.warn('Frame load error:', e));
+});
+window.addEventListener('resize', resizeCanvas);
+// Trigger resizeCanvas if front image already cached
+if (frameImages[0].complete && frameImages[0].naturalWidth) {
+  computeRef(); setTimeout(resizeCanvas, 0);
+}
+</script>
+</body>
+</html>
