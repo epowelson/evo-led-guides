@@ -107,7 +107,7 @@
     min-height: 0;
     position: relative;
     overflow: hidden;
-    padding: 24px 16px 12px;
+    padding: 24px 16px 60px;
   }
 
   .device-wrapper {
@@ -141,8 +141,36 @@
   }
 
 
+
+  .fullscreen-btn {
+    position: absolute;
+    top: 12px;
+    left: 32px;
+    z-index: 20;
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(0,0,0,0.15);
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 5px 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    border-radius: 6px;
+    transition: border-color 0.2s, color 0.2s;
+    white-space: nowrap;
+  }
+  .fullscreen-btn:hover { border-color: rgba(0,0,0,0.3); color: var(--text); }
+  .fullscreen-btn svg { flex-shrink: 0; }
+
   .spin-btn {
-    position: relative;
+    position: absolute;
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
     background: rgba(255, 255, 255, 0.88);
     backdrop-filter: blur(6px);
     border: 1px solid rgba(0,0,0,0.15);
@@ -162,13 +190,6 @@
     border-color: rgba(255,255,255,0.3);
     color: var(--text);
     box-shadow: 0 2px 12px rgba(0,0,0,0.4);
-  }
-  .spin-btn-bar {
-    flex-shrink: 0;
-    display: flex;
-    justify-content: center;
-    padding: 10px 0 16px;
-    border-top: 1px solid var(--border);
   }
 
   .spin-btn:disabled {
@@ -645,12 +666,9 @@
       <div class="led-hotspot shape-rect" data-led="power"  data-back="1" data-top="84.26" data-left="36.87" data-wpct="14.18" data-hpct="4.88"  style="display:none;"></div>
 
       </div>
-    </div>
-
-    <div class="spin-btn-bar">
+      <button class="fullscreen-btn" id="fsBtn" onclick="toggleFullscreen()"><svg id="fsIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg> FULLSCREEN</button>
       <button class="spin-btn" id="spinBtn" onclick="handleSpinBtn()">View Back Panel ›</button>
     </div>
-
   </div>
 
   <!-- ─── Info Panel ─── -->
@@ -1475,6 +1493,28 @@ function renderBackPortInfo(id) {
   if (frontImg.complete && frontImg.naturalWidth) {
     setTimeout(resizeCanvas, 0);
   }
+
+// ── Fullscreen ──────────────────────────────────────────────────────────────
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(function(err) {
+      console.warn('Fullscreen error:', err);
+    });
+  } else {
+    document.exitFullscreen();
+  }
+}
+
+document.addEventListener('fullscreenchange', function() {
+  const btn = document.getElementById('fsBtn');
+  if (!btn) return;
+  const isFs = !!document.fullscreenElement;
+  btn.innerHTML = isFs
+    ? '<svg id="fsIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="14" x2="3" y2="21"/><line x1="21" y1="3" x2="14" y2="10"/></svg> EXIT'
+    : '<svg id="fsIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg> FULLSCREEN';
+  btn.onclick = toggleFullscreen;
+  setTimeout(resizeCanvas, 50);
+});
 
 </script>
 </body>
