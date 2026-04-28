@@ -89,6 +89,13 @@
   }
 
   /* ─── Device panel ─── */
+
+  /* Wider info panel in fullscreen mode */
+  :fullscreen .app,
+  :-webkit-full-screen .app {
+    grid-template-columns: 1fr 420px;
+  }
+
   .device-panel {
     border-right: 1px solid var(--border);
     background: var(--bg);
