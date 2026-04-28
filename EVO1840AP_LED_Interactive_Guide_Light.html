@@ -40,12 +40,11 @@
   .app { flex:1; display:grid; grid-template-columns:1fr 300px; gap:0; min-height:0; overflow:hidden; height:100%; }
 
   .device-panel { border-right:1px solid var(--border); background:var(--bg); display:flex; flex-direction:column; align-items:stretch; padding:0; position:relative; overflow:hidden; min-height:0; height:100%; }
-  .device-image-area { flex:1; min-height:0; position:relative; overflow:hidden; padding:24px 16px 12px; }
+  .device-image-area { flex:1; min-height:0; position:relative; overflow:hidden; padding:24px 16px 60px; }
   .device-wrapper { position:relative; width:100%; height:100%; user-select:none; }
   #deviceCanvas { background:var(--bg); position:absolute; top:0; left:0; }
 
-  .spin-btn-bar { flex-shrink:0; display:flex; justify-content:center; padding:10px 0 16px; border-top:1px solid var(--border); }
-  .spin-btn { position:relative; background:rgba(255,255,255,0.88); backdrop-filter:blur(6px); border:1px solid rgba(0,0,0,0.15); color:var(--text-muted); font-family:var(--mono); font-size:11px; letter-spacing:0.08em; padding:8px 18px; border-radius:9999px; cursor:pointer; white-space:nowrap; transition:border-color 0.2s, color 0.2s, box-shadow 0.2s; }
+  .spin-btn { position:absolute; bottom:14px; left:50%; transform:translateX(-50%); background:rgba(255,255,255,0.88); backdrop-filter:blur(6px); border:1px solid rgba(0,0,0,0.15); color:var(--text-muted); font-family:var(--mono); font-size:11px; letter-spacing:0.08em; padding:8px 18px; border-radius:9999px; cursor:pointer; white-space:nowrap; transition:border-color 0.2s, color 0.2s, box-shadow 0.2s; }
   .spin-btn:hover { border-color:rgba(0,0,0,0.3); color:var(--text); box-shadow:0 2px 12px rgba(0,0,0,0.15); }
   .spin-btn:disabled { opacity:0.4; cursor:not-allowed; }
 
@@ -103,9 +102,13 @@
 
 
   .fullscreen-btn {
-    margin-left: auto;
-    background: none;
-    border: 1px solid var(--border);
+    position: absolute;
+    top: 12px;
+    left: 32px;
+    z-index: 20;
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(0,0,0,0.15);
     border-radius: 6px;
     color: var(--text-muted);
     cursor: pointer;
@@ -129,13 +132,9 @@
 <body>
 
 <header>
-  <div class="header-tag">LED Reference</div>
+<div class="header-tag">LED Reference</div>
   <h1>EVO1840AP — Front Panel LED Guide</h1>
   <p>Rev. April 2026</p>
-  <button class="fullscreen-btn" id="fsBtn" onclick="toggleFullscreen()">
-    <svg id="fsIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
-    FULLSCREEN
-  </button>
 </header>
 
 <div class="app">
@@ -163,8 +162,7 @@
 
 
       </div>
-    </div>
-    <div class="spin-btn-bar">
+      <button class="fullscreen-btn" id="fsBtn" onclick="toggleFullscreen()"><svg id="fsIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg> FULLSCREEN</button>
       <button class="spin-btn" id="spinBtn" onclick="handleSpinBtn()">View Back Panel ›</button>
     </div>
   </div>
