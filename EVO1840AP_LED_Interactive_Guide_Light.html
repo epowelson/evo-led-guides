@@ -358,6 +358,11 @@ function resizeCanvas() {
   const wrapper = document.getElementById('deviceWrapper');
   canvasW = wrapper.offsetWidth;
   canvasH = wrapper.offsetHeight;
+  // If wrapper has no dimensions yet, layout hasn't painted — retry next frame
+  if (!canvasW || !canvasH) {
+    requestAnimationFrame(resizeCanvas);
+    return;
+  }
   canvas.width  = canvasW;
   canvas.height = canvasH;
   computeRef();
